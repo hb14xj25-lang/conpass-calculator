@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"%3E%3Crect width="32" height="32" rx="7" fill="%230b5f5a"/%3E%3Cpath d="M9 19c1.5 4.5 6.1 6.1 9.8 3.7 3.6-2.4 4.8-7.5 2.7-11.2-1.7-3-5-4-7.9-2.9-3.7 1.3-5.8 6.2-4.6 10.4Z" fill="%23ffffff"/%3E%3Cpath d="M13 17.2l2.3 2.3 5-6" fill="none" stroke="%230b5f5a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E'>
 <style>
   :root {
-    --bg: #f5f7f6;
+    --bg: #f4f7f8;
     --surface: #ffffff;
     --surface-2: #eef6f4;
     --ink: #17242f;
@@ -33,14 +33,15 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
     background: var(--bg);
     color: var(--ink);
-    line-height: 1.65;
+    font-size: 16px;
+    line-height: 1.7;
   }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 42px; }
-  header { display: grid; gap: 8px; margin-bottom: 18px; }
-  h1 { margin: 0; color: var(--primary-strong); font-size: clamp(24px, 3vw, 34px); line-height: 1.25; }
-  .lead { max-width: 840px; margin: 0; color: var(--muted); font-size: 15px; }
+  .wrap { width: min(calc(100% - 28px), 1500px); margin: 0 auto; padding: 22px 0 42px; }
+  header { display: grid; gap: 9px; margin-bottom: 18px; }
+  h1 { margin: 0; color: var(--primary-strong); font-size: clamp(28px, 2.8vw, 42px); line-height: 1.2; }
+  .lead { max-width: 1080px; margin: 0; color: #425466; font-size: 17px; }
   .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-  .badge { display: inline-flex; align-items: center; min-height: 28px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: #fff; color: var(--primary-strong); font-size: 13px; font-weight: 700; }
+  .badge { display: inline-flex; align-items: center; min-height: 30px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: #fff; color: var(--primary-strong); font-size: 14px; font-weight: 700; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 2px; }
   .tool-btn {
     min-height: 38px;
@@ -54,26 +55,27 @@
     font-weight: 700;
   }
   .tool-btn:hover { border-color: var(--primary); background: var(--surface-2); }
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 0.82fr); gap: 16px; align-items: start; }
-  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; box-shadow: 0 1px 5px rgba(16, 50, 47, 0.04); }
-  .panel + .panel { margin-top: 16px; }
-  h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: var(--primary-strong); font-size: 19px; line-height: 1.35; }
-  .num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: minmax(430px, 1.03fr) minmax(420px, 0.97fr); gap: 20px; align-items: start; }
+  aside { position: sticky; top: 14px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: 0 1px 8px rgba(16, 50, 47, 0.05); }
+  .panel + .panel { margin-top: 20px; }
+  h2 { display: flex; align-items: center; gap: 9px; margin: 0 0 15px; color: var(--primary-strong); font-size: 21px; line-height: 1.35; }
+  .num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 14px; }
   fieldset { border: 0; padding: 0; margin: 0; }
-  legend, label { font-weight: 700; font-size: 14px; }
-  .hint { color: var(--muted); font-weight: 400; font-size: 13px; }
-  .field { display: grid; gap: 7px; margin-bottom: 14px; }
+  legend, label { font-weight: 800; font-size: 16px; }
+  .hint { color: var(--muted); font-weight: 500; font-size: 14px; }
+  .field { display: grid; gap: 8px; margin-bottom: 16px; }
   .row { display: flex; gap: 10px; align-items: center; }
   input[type="number"] {
     width: 100%;
     min-width: 0;
-    height: 46px;
+    height: 50px;
     border: 1.5px solid var(--line);
     border-radius: 8px;
     padding: 10px 12px;
     background: #fff;
     color: var(--ink);
-    font-size: 16px;
+    font-size: 18px;
   }
   input[type="number"]:focus { border-color: var(--primary); outline: 3px solid rgba(11, 107, 99, 0.12); }
   input.bad { border-color: var(--bad); background: var(--bad-bg); }
@@ -94,15 +96,20 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    min-height: 40px;
+    min-height: 44px;
     border: 1.5px solid var(--line);
     border-radius: 8px;
     background: #fbfcfc;
     padding: 7px 11px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
   }
+  .radio-group label strong { display: block; color: var(--ink); line-height: 1.25; }
+  .radio-group label span { display: block; color: var(--muted); font-size: 13px; font-weight: 500; line-height: 1.35; }
+  .radio-group label.sel strong, .checkline.sel { color: var(--primary-strong); }
+  .ct-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .ct-cards label { align-items: flex-start; padding: 11px 12px; }
   .radio-group label.sel, .checkline.sel { border-color: var(--primary); background: var(--surface-2); color: var(--primary-strong); }
   input[type="radio"], input[type="checkbox"] { accent-color: var(--primary); }
   .checks { display: grid; gap: 8px; margin-bottom: 14px; }
@@ -110,14 +117,14 @@
   .action:hover { background: var(--primary-strong); }
   .placeholder { border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); text-align: center; background: #f9fbfb; }
   .issue-list { display: grid; gap: 8px; margin-bottom: 12px; }
-  .issue, .note { border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .issue, .note { border-radius: 8px; padding: 11px 13px; font-size: 15px; }
   .issue.error { background: var(--bad-bg); border: 1px solid #ffc9c2; color: var(--bad); }
   .issue.warning { background: var(--warn-bg); border: 1px solid #f6d48b; color: var(--warn); }
   .issue.scope { background: var(--scope-bg); border: 1px solid #c7d9ff; color: var(--scope); }
   .issue.info { background: var(--soft-bg); border: 1px solid var(--line); color: var(--soft); }
   .note { background: #f6faf9; border: 1px solid var(--line); color: var(--muted); }
   .criteria { display: grid; gap: 8px; }
-  .crit { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .crit { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border-radius: 8px; padding: 12px 13px; font-size: 15px; }
   .crit.ok { background: var(--ok-bg); }
   .crit.no { background: var(--bad-bg); }
   .tag { font-weight: 800; }
@@ -125,8 +132,8 @@
   .crit.no .tag { color: var(--bad); }
   .value { color: var(--muted); text-align: right; }
   .verdict { margin-top: 12px; border-radius: 8px; padding: 14px; font-weight: 800; }
-  .verdict strong { display: block; margin-bottom: 3px; font-size: 17px; }
-  .verdict p { margin: 0; font-weight: 500; font-size: 14px; }
+  .verdict strong { display: block; margin-bottom: 4px; font-size: 20px; }
+  .verdict p { margin: 0; font-weight: 550; font-size: 15px; }
   .verdict.positive { background: var(--primary); color: #fff; }
   .verdict.invalid { background: var(--bad-bg); color: var(--bad); border: 1px solid #ffc9c2; }
   .verdict.scope { background: var(--scope-bg); color: var(--scope); border: 1px solid #c7d9ff; }
@@ -136,22 +143,24 @@
   .rule-list { margin: 0; padding-left: 20px; }
   .rule-list li { margin: 5px 0; }
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13.5px; }
+  table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14.5px; }
   th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: top; }
   th { background: var(--surface-2); color: var(--primary-strong); }
   td:first-child, th:first-child { text-align: left; }
-  .small { color: var(--muted); font-size: 13px; }
+  .small { color: var(--muted); font-size: 14px; }
   a { color: var(--primary); text-decoration-thickness: 1px; text-underline-offset: 2px; }
   footer { margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center; }
-  @media (max-width: 880px) {
+  @media (max-width: 980px) {
     .grid { grid-template-columns: 1fr; }
+    aside { position: static; }
   }
   @media (max-width: 560px) {
-    .wrap { padding: 16px 10px 32px; }
+    .wrap { width: min(calc(100% - 20px), 1500px); padding: 16px 0 32px; }
     .panel { padding: 15px 12px; }
     .row { flex-wrap: wrap; }
     .unit-switch { width: 100%; }
     .unit-switch button { flex: 1; }
+    .ct-cards { grid-template-columns: 1fr; }
     .toolbar, .result-actions { display: grid; grid-template-columns: 1fr; }
     .crit { grid-template-columns: 1fr; gap: 2px; }
     .value { text-align: left; }
@@ -162,7 +171,7 @@
 <div class="wrap">
   <header>
     <h1>CONPASS 单侧原发性醛固酮增多症预测模型</h1>
-    <p class="lead">用于已确诊 PA 患者分型阶段的高特异度辅助规则。它可以筛出一小部分高度疑似 UPA 的患者，但不是替代 AVS 的通用决策器。</p>
+    <p class="lead">用于已确诊 PA 患者分型阶段的高特异度辅助规则。页面核心只回答一个问题：当前资料是否强烈支持“单侧 PA / UPA”。双侧病灶、无结节或影像不确定时，模型会自动降级为不适用。</p>
     <div class="badge-row">
       <span class="badge">Song 2022 建模</span>
       <span class="badge">中华内科杂志 2026 再验证</span>
@@ -226,12 +235,12 @@
         </div>
 
         <fieldset class="field">
-          <legend>肾上腺 CT 结节情况</legend>
-          <div class="radio-group" id="ctChoice">
-            <label class="sel"><input type="radio" name="ct" value="single" checked> 明确单侧结节</label>
-            <label><input type="radio" name="ct" value="none"> 无结节</label>
-            <label><input type="radio" name="ct" value="bilateral"> 双侧结节</label>
-            <label><input type="radio" name="ct" value="unclear"> 影像不确定</label>
+          <legend>肾上腺 CT 病灶侧别</legend>
+          <div class="radio-group ct-cards" id="ctChoice">
+            <label class="sel"><input type="radio" name="ct" value="single" checked><span><strong>明确单侧病灶</strong><span>仅左侧或仅右侧有结节/腺瘤</span></span></label>
+            <label><input type="radio" name="ct" value="bilateral"><span><strong>双侧病灶</strong><span>左右两侧均有结节、增粗或可疑病灶</span></span></label>
+            <label><input type="radio" name="ct" value="none"><span><strong>未见明确结节</strong><span>CT 未描述可测量肾上腺结节</span></span></label>
+            <label><input type="radio" name="ct" value="unclear"><span><strong>影像不确定</strong><span>报告含糊、侧别不清或资料不足</span></span></label>
           </div>
         </fieldset>
 
@@ -257,8 +266,8 @@
 
     <aside>
       <div class="panel" id="resultPanel" aria-live="polite">
-        <h2><span class="num">3</span>判定结果</h2>
-        <div class="placeholder" id="placeholder">填写指标后生成结果、适用性提示和四项阈值核对。</div>
+        <h2><span class="num">3</span>单侧 PA 判断</h2>
+        <div class="placeholder" id="placeholder">填写指标后生成“是否支持单侧 PA”的结论，并逐项显示 CT 侧别、结节大小和三项实验室阈值。</div>
         <div id="resultBody" hidden>
           <div class="issue-list" id="issuePanel"></div>
           <div class="criteria" id="criteriaPanel"></div>
@@ -276,7 +285,7 @@
           <li>血清钾 ≤ 3.5 mmol/L</li>
           <li>PAC ≥ 200 pg/mL（= 554 pmol/L）</li>
           <li>PRC / DRC ≤ 5 mU/L</li>
-          <li>CT 明确单侧结节且直径 ≥ 10 mm</li>
+      <li>CT 明确单侧病灶，且该侧结节/腺瘤直径 ≥ 10 mm</li>
         </ol>
         <p class="note">四项必须同时满足。未满足不等于双侧 PA，仍需按指南路径完成分型。</p>
       </div>
@@ -375,13 +384,17 @@
       panel.appendChild(div);
     });
   }
+  function renderCtValue(n) {
+    if (n.ct === "single") return "明确单侧，" + fmt(n.noduleMm, 1, " mm");
+    return n.ctLabel;
+  }
   function renderCriteria(result) {
     var n = result.normalized;
     var rows = [
       ["potassium", "血清钾 ≤ 3.5 mmol/L", fmt(n.potassium, 2, " mmol/L")],
       ["pac", "PAC ≥ 200 pg/mL", fmt(n.pacPgMl, 1, " pg/mL")],
       ["renin", "PRC / DRC ≤ 5 mU/L", fmt(n.renin, 2, " mU/L")],
-      ["ct", "CT 单侧结节 ≥ 10 mm", n.ct === "single" ? fmt(n.noduleMm, 1, " mm") : n.ctLabel]
+      ["ct", "CT 侧别：明确单侧病灶且 ≥ 10 mm", renderCtValue(n)]
     ];
     byId("criteriaPanel").innerHTML = rows.map(function (row) {
       var ok = result.criteria[row[0]];
@@ -400,7 +413,7 @@
     } else if (result.status === "not_applicable") {
       boxClass = "scope";
       title = "模型不适用或需降级解释";
-      text = "当前资料不满足 CONPASS 的适用前提；不应据此给出免 AVS 或直接手术判断。";
+      text = "当前资料不是明确单侧病灶、或检测/诊断前提不匹配；不应据此给出免 AVS 或直接手术判断。";
     } else if (result.status === "conpass_positive") {
       boxClass = "positive";
       title = hasWarning ? "符合 CONPASS 规则，但存在需核对项" : "符合 CONPASS 高特异度规则";
@@ -500,7 +513,7 @@
       "血清钾: " + fmt(n.potassium, 2, " mmol/L") + " (" + (result.criteria.potassium ? "满足" : "不满足") + ")",
       "PAC: " + fmt(n.pacPgMl, 1, " pg/mL") + " (" + (result.criteria.pac ? "满足" : "不满足") + ")",
       "PRC/DRC: " + fmt(n.renin, 2, " mU/L") + " (" + (result.criteria.renin ? "满足" : "不满足") + ")",
-      "CT: " + (n.ct === "single" ? fmt(n.noduleMm, 1, " mm") : n.ctLabel) + " (" + (result.criteria.ct ? "满足" : "不满足") + ")",
+      "CT 侧别与结节: " + renderCtValue(n) + " (" + (result.criteria.ct ? "满足" : "不满足") + ")",
       "提示: " + issues,
       "说明: 本工具仅供科研与教学参考，不构成临床诊断或治疗决策依据。"
     ].join("\n");

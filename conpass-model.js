@@ -23,9 +23,9 @@
   };
 
   var CT_LABELS = {
-    single: "单侧结节",
-    none: "无结节",
-    bilateral: "双侧结节",
+    single: "明确单侧病灶",
+    none: "未见明确结节",
+    bilateral: "双侧病灶",
     unclear: "影像不确定"
   };
 
@@ -88,7 +88,7 @@
     if (!confirmedPa) addIssue(issues, "not_confirmed_pa", "scope", "尚未确认 PA 诊断", "CONPASS 是分型辅助规则，不应用作 PA 初筛。");
     if (reninMethod !== "drc") addIssue(issues, "renin_method_not_drc", "scope", "肾素方法不匹配", "PRA 与 DRC 不是同一指标，不能直接套用 mU/L 切点。");
     if (pacMethod === "lcms") addIssue(issues, "pac_method_lcms", "scope", "PAC 检测方法不匹配", "LC-MS/MS 与免疫法切点不同，需重新验证或按指南对应阈值解释。");
-    if (ct !== "single") addIssue(issues, "ct_not_single", "scope", "CT 不是明确单侧结节", "无结节、双侧结节或影像不确定时，模型不支持免 AVS 判断。");
+    if (ct !== "single") addIssue(issues, "ct_not_single", "scope", "CT 不是明确单侧病灶", "未见明确结节、双侧病灶或影像不确定时，模型不支持免 AVS 判断。");
 
     var criteria = {
       potassium: Number.isFinite(potassium) && potassium <= THRESHOLDS.potassiumMax,
