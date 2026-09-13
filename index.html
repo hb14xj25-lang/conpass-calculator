@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONPASS 单侧原发性醛固酮增多症预测模型</title>
+<style>
+  :root{
+    --primary:#0f6f6a; --primary-dark:#0a4f4b; --accent:#1a9a8f;
+    --bg:#f4f7f6; --card:#ffffff; --ink:#1f2d3d; --muted:#64748b;
+    --ok:#16a34a; --ok-bg:#e8f7ee; --no:#dc2626; --no-bg:#fdeaea;
+    --border:#e2e8f0; --amber:#b45309;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.65;
+    padding:24px 16px 48px;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  header{text-align:center; margin-bottom:24px;}
+  header h1{font-size:26px; color:var(--primary-dark); font-weight:700; letter-spacing:.5px;}
+  header .sub{color:var(--muted); font-size:14px; margin-top:6px;}
+  .badge{display:inline-block; background:var(--primary); color:#fff; font-size:12px; padding:3px 12px; border-radius:999px; margin-top:10px; letter-spacing:1px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:18px; box-shadow:0 2px 8px rgba(15,111,106,.06);}
+  .card h2{font-size:18px; color:var(--primary-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px;}
+  .card h2 .n{background:var(--primary); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:none;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:14px; font-weight:600; margin-bottom:6px; color:var(--ink);}
+  .field .hint{font-weight:400; color:var(--muted); font-size:12px;}
+  .row{display:flex; gap:10px; align-items:center;}
+  .row input[type=number]{flex:1; padding:12px 14px; font-size:16px; border:1.5px solid var(--border); border-radius:10px; outline:none; transition:border .15s; min-width:0;}
+  .row input[type=number]:focus{border-color:var(--accent);}
+  .unit-switch{display:flex; background:#eef2f2; border-radius:10px; padding:3px; flex:none;}
+  .unit-switch button{border:none; background:transparent; padding:8px 12px; font-size:13px; cursor:pointer; border-radius:8px; color:var(--muted); white-space:nowrap;}
+  .unit-switch button.on{background:#fff; color:var(--primary-dark); font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .calc-btn{width:100%; padding:15px; font-size:17px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--accent),var(--primary)); border:none; border-radius:12px; cursor:pointer; letter-spacing:2px; transition:transform .1s, opacity .2s;}
+  .calc-btn:hover{opacity:.94;}
+  .calc-btn:active{transform:scale(.99);}
+  .result{display:none;}
+  .result.show{display:block;}
+  .crit{display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-radius:10px; margin-bottom:8px; font-size:14px; gap:10px; flex-wrap:wrap;}
+  .crit.ok{background:var(--ok-bg);}
+  .crit.no{background:var(--no-bg);}
+  .crit .tag{font-weight:700;}
+  .crit.ok .tag{color:var(--ok);}
+  .crit.no .tag{color:var(--no);}
+  .verdict{margin-top:14px; padding:18px; border-radius:12px; font-size:16px; font-weight:700; text-align:center;}
+  .verdict.upa{background:#0f6f6a; color:#fff;}
+  .verdict.not{background:#f59e0b; color:#fff;}
+  .verdict small{display:block; font-weight:400; font-size:13px; margin-top:6px; opacity:.92;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{padding:9px 8px; text-align:center; border-bottom:1px solid var(--border); vertical-align:middle;}
+  th{background:#f0f6f5; color:var(--primary-dark); font-weight:700;}
+  td.left, th.left{text-align:left;}
+  .ref{font-size:13px; color:var(--muted);}
+  .ref li{margin-bottom:8px;}
+  .ref a{color:var(--primary); text-decoration:none;}
+  .ref a:hover{text-decoration:underline;}
+  .warn{background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; font-size:13px; border-radius:10px; padding:12px 14px; margin-top:12px;}
+  .note{background:#eef6ff; border:1px solid #bfdbfe; color:#1e40af; font-size:13px; border-radius:10px; padding:12px 14px; margin-top:12px;}
+  .flow{list-style:none; counter-reset:step;}
+  .flow li{position:relative; padding:0 0 14px 30px; font-size:14px; color:var(--ink);}
+  .flow li:before{counter-increment:step; content:counter(step); position:absolute; left:0; top:0; width:22px; height:22px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px;}
+  .flow li:not(:last-child):after{content:''; position:absolute; left:10px; top:24px; bottom:2px; width:2px; background:var(--border);}
+  .model-rule{background:#f0f6f5; border:1px solid #cfe5e2; border-radius:12px; padding:14px 16px; margin:12px 0; font-size:14px;}
+  .model-rule b{color:var(--primary-dark);}
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>CONPASS 单侧原发性醛固酮增多症预测模型</h1>
+    <div class="sub">Chongqing Primary Aldosteronism Study · 帮助符合条件的患者跳过 AVS、直接手术</div>
+    <span class="badge">Song 2022 建模 · 中华内科杂志 2026 再验证</span>
+  </header>
+
+  <div class="card">
+    <h2><span class="n">1</span>输入患者指标</h2>
+
+    <div class="field">
+      <label>① 血清钾 <span class="hint">（mmol/L）</span></label>
+      <div class="row">
+        <input type="number" id="K" step="0.01" placeholder="如 3.2">
+        <div class="unit-switch"><button class="on" type="button">mmol/L</button></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>② 血浆醛固酮浓度 PAC</label>
+      <div class="row">
+        <input type="number" id="PAC" step="0.1" placeholder="如 280">
+        <div class="unit-switch" id="pacUnit">
+          <button type="button" data-f="1" class="on">pg/mL</button>
+          <button type="button" data-f="2.77">pmol/L</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>③ 血浆肾素浓度 PRC <span class="hint">（直接肾素浓度 DRC，mU/L）</span></label>
+      <div class="row">
+        <input type="number" id="PRC" step="0.01" placeholder="如 2.0">
+        <div class="unit-switch"><button class="on" type="button">mU/L</button></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>④ 肾上腺 CT 单侧结节最大直径</label>
+      <div class="row">
+        <input type="number" id="NODULE" step="0.1" placeholder="如 15（无结节填 0）">
+        <div class="unit-switch" id="nodUnit">
+          <button type="button" data-f="1" class="on">mm</button>
+          <button type="button" data-f="10">cm</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn">⚠️ 肾素须为「直接肾素浓度 DRC（mU/L）」。若你手里是「肾素活性 PRA（ng/ml/h）」，两者不是同一指标，本模型切点不适用。</div>
+
+    <button class="calc-btn" id="calc" style="margin-top:18px;">判 断 是 否 单 侧 PA</button>
+  </div>
+
+  <div class="card result" id="result">
+    <h2><span class="n">2</span>判定结果</h2>
+    <div id="crits"></div>
+    <div id="verdict"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">3</span>模型规则（复现自原始文献）</h2>
+    <div class="model-rule">判定为「单侧 PA (UPA)」需<b>同时满足全部 4 条</b>：</div>
+    <div class="model-rule" style="margin-top:0;">
+      ① 血清钾 <b>≤ 3.5</b> mmol/L<br>
+      ② 血浆醛固酮浓度 PAC <b>≥ 200</b> pg/mL（= 554 pmol/L）<br>
+      ③ 血浆肾素浓度 PRC <b>≤ 5</b> mU/L<br>
+      ④ 肾上腺 CT 示<b>单侧结节</b>且直径 <b>≥ 10</b> mm
+    </div>
+    <div class="note">💡 该模型<b>取消了年龄限制</b>。现行 2025 美国内分泌学会指南要求「年龄 &lt;35 岁」，但全球 UPA 平均诊断年龄约 49 岁；本模型识别的 UPA 患者中 93.8% 年龄 ≥35 岁——这正是它敏感度远高于指南标准的原因。</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">4</span>性能对比（三个队列 / 标准）</h2>
+    <table>
+      <tr><th class="left">模型 / 标准</th><th>敏感度</th><th>特异度</th><th>阳性预测值</th><th>阴性预测值</th></tr>
+      <tr><td class="left">CONPASS 原始建模队列<br><span style="color:var(--muted);font-size:12px;">Song 2022 · n=356 (UPA 268/BPA 88)</span></td><td>52%</td><td>100%</td><td>—</td><td>—</td></tr>
+      <tr><td class="left"><b>CONPASS 再验证队列</b><br><span style="color:var(--muted);font-size:12px;">中华内科杂志 2026 · n=267 (UPA 151/BPA 116)</span></td><td><b>31.8%</b></td><td><b>98.3%</b></td><td><b>96.0%</b></td><td><b>52.5%</b></td></tr>
+      <tr><td class="left">美国内分泌学会指南标准<br><span style="color:var(--muted);font-size:12px;">同一再验证队列</span></td><td>2.0%</td><td>100%</td><td>—</td><td>—</td></tr>
+    </table>
+    <div style="font-size:12.5px; color:var(--muted); margin-top:10px;">
+      判定为「单侧」→ 大概率可手术治愈（再验证队列误判率仅 4.0%）。判定为「不能确定」→ 不代表一定是双侧，需 AVS 进一步分型（模型只能识别约 1/3 的单侧 PA，敏感度有限）。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">5</span>模型是如何建立的（方法复现）</h2>
+    <ol class="flow">
+      <li><b>队列</b>：重庆原发性醛固酮增多症队列 CONPASS，共 356 例确诊 PA 患者（UPA 268 例 / BPA 88 例），以 AVS 或术后生化缓解为分型金标准。</li>
+      <li><b>候选变量</b>：收集临床特征（年龄、血钾）、生化指标（PAC、PRC）、影像（CT 单侧结节及大小）等。</li>
+      <li><b>变量筛选</b>：采用多因素 Logistic 回归识别与单侧病变独立相关的预测因子。</li>
+      <li><b>切点确定</b>：对入选的连续变量逐一枚举/优化诊断切点（如血钾 ≤3.5、PAC ≥200 pg/mL、PRC ≤5 mU/L、结节 ≥10 mm），使特异度达到 100%（避免把双侧误判为单侧而错误手术）。</li>
+      <li><b>形成规则</b>：最终模型为「4 条件同时满足」的规则模型（AND 逻辑），并在独立验证队列（201 例：UPA 84 / BPA 117）验证。</li>
+    </ol>
+    <div class="note">📌 说明：原始论文为付费全文（LWW），其 Logistic 回归的 OR/β 系数需订阅方能查看；但<b>最终临床决策规则与全部切点均已明确</b>，可直接复现与使用。若需在你的本地数据上重跑「变量筛选 + 切点枚举」全流程，见配套脚本 conpass_predict.py。</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">6</span>模型来源</h2>
+    <ol class="ref">
+      <li>杨淑敏, 魏馨, 宋颖, 等. 单侧原发性醛固酮增多症预测模型再验证. <i>中华内科杂志</i>, 2026, 65(7). <a href="https://rs.yiigle.com/cmaid/1687020" target="_blank">原文 →</a></li>
+      <li>Song Y, Yang J, Shen H, et al. Development and validation of model for sparing adrenal venous sampling in diagnosing unilateral primary aldosteronism. <i>J Hypertens</i>, 2022, 40(9):1692-1701. <a href="https://doi.org/10.1097/HJH.0000000000003197" target="_blank">DOI: 10.1097/HJH.0000000000003197 →</a></li>
+    </ol>
+    <div class="warn">本工具仅供科研与教学参考，不构成临床诊断依据；最终诊疗决策请遵循专业指南并结合患者具体情况。PRC 采用化学发光法（LIAISON, DiaSorin）测定，若用质谱法测醛固酮或以肾素活性代替肾素浓度，切点需重新验证。</div>
+  </div>
+
+  <footer>CONPASS 模型 · 血钾≤3.5 且 醛固酮≥200 pg/mL 且 肾素≤5 mU/L 且 单侧结节≥10 mm · 取消年龄限制</footer>
+</div>
+
+<script>
+(function(){
+  var pacF = 1, nodF = 1;
+  document.getElementById('pacUnit').addEventListener('click', function(e){
+    if(e.target.tagName !== 'BUTTON') return;
+    pacF = parseFloat(e.target.dataset.f);
+    Array.from(e.target.parentElement.children).forEach(b=>b.classList.remove('on'));
+    e.target.classList.add('on');
+  });
+  document.getElementById('nodUnit').addEventListener('click', function(e){
+    if(e.target.tagName !== 'BUTTON') return;
+    nodF = parseFloat(e.target.dataset.f);
+    Array.from(e.target.parentElement.children).forEach(b=>b.classList.remove('on'));
+    e.target.classList.add('on');
+  });
+
+  document.getElementById('calc').addEventListener('click', function(){
+    var K = parseFloat(document.getElementById('K').value);
+    var pac = parseFloat(document.getElementById('PAC').value);
+    var prc = parseFloat(document.getElementById('PRC').value);
+    var nod = parseFloat(document.getElementById('NODULE').value);
+    if([K,pac,prc,nod].some(isNaN)){
+      alert('请把四个指标都填上（无结节填 0）。');
+      return;
+    }
+    var PAC = pac / pacF;          // 统一换算成 pg/mL
+    var NOD = nod * nodF;          // 统一换算成 mm
+
+    var c1 = K <= 3.5;
+    var c2 = PAC >= 200;
+    var c3 = prc <= 5;
+    var c4 = NOD >= 10;
+    var isUPA = c1 && c2 && c3 && c4;
+
+    var crits = [
+      {ok:c1, txt:'① 血清钾 ≤ 3.5 mmol/L', val:K+' mmol/L'},
+      {ok:c2, txt:'② 醛固酮 ≥ 200 pg/mL', val:PAC.toFixed(1)+' pg/mL'},
+      {ok:c3, txt:'③ 肾素 ≤ 5 mU/L', val:prc+' mU/L'},
+      {ok:c4, txt:'④ 单侧结节 ≥ 10 mm', val:NOD.toFixed(1)+' mm'}
+    ];
+    var html = crits.map(function(c){
+      return '<div class="crit '+(c.ok?'ok':'no')+'">'+
+             '<span class="tag">'+(c.ok?'✅ 满足':'❌ 不满足')+'</span>'+
+             '<span>'+c.txt+'</span>'+
+             '<span style="color:var(--muted)">'+c.val+'</span></div>';
+    }).join('');
+
+    var verdict;
+    if(isUPA){
+      verdict = '<div class="verdict upa">判定为「单侧 PA (UPA)」——可考虑跳过 AVS、直接单侧肾上腺切除'+
+                '<small>模型特异度 98.3% · 阳性预测值 96.0%（误判概率很低）</small></div>';
+    }else{
+      verdict = '<div class="verdict not">判定为「不能确定单侧」——建议行 AVS 分型，勿仅凭此直接手术'+
+                '<small>模型敏感度仅 31.8%，阴性不代表一定是双侧</small></div>';
+    }
+    document.getElementById('crits').innerHTML = html;
+    document.getElementById('verdict').innerHTML = verdict;
+    var res = document.getElementById('result');
+    res.classList.add('show');
+    res.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+})();
+</script>
+</body>
+</html>
