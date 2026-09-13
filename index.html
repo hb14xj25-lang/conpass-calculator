@@ -4,329 +4,544 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CONPASS 单侧原发性醛固酮增多症预测模型</title>
+<meta name="description" content="CONPASS 规则计算器：用于已确诊 PA 患者的单侧 PA 高特异度辅助分型判断。">
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"%3E%3Crect width="32" height="32" rx="7" fill="%230b5f5a"/%3E%3Cpath d="M9 19c1.5 4.5 6.1 6.1 9.8 3.7 3.6-2.4 4.8-7.5 2.7-11.2-1.7-3-5-4-7.9-2.9-3.7 1.3-5.8 6.2-4.6 10.4Z" fill="%23ffffff"/%3E%3Cpath d="M13 17.2l2.3 2.3 5-6" fill="none" stroke="%230b5f5a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E'>
 <style>
-  :root{
-    --primary:#0f6f6a; --primary-dark:#0a4f4b; --accent:#1a9a8f;
-    --bg:#f4f7f6; --card:#ffffff; --ink:#1f2d3d; --muted:#64748b;
-    --ok:#16a34a; --ok-bg:#e8f7ee; --no:#dc2626; --no-bg:#fdeaea;
-    --warn-amber:#b45309; --border:#e2e8f0;
+  :root {
+    --bg: #f5f7f6;
+    --surface: #ffffff;
+    --surface-2: #eef6f4;
+    --ink: #17242f;
+    --muted: #5e7080;
+    --primary: #0b6b63;
+    --primary-strong: #084b46;
+    --line: #d8e1df;
+    --ok: #16803a;
+    --ok-bg: #e8f6ec;
+    --warn: #9a5a00;
+    --warn-bg: #fff5dd;
+    --bad: #b42318;
+    --bad-bg: #fff0ee;
+    --scope: #1d4ed8;
+    --scope-bg: #edf4ff;
+    --soft: #425466;
+    --soft-bg: #f3f6f8;
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
-    background:var(--bg); color:var(--ink); line-height:1.65;
-    padding:24px 16px 48px;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
   }
-  .wrap{max-width:840px; margin:0 auto;}
-  header{text-align:center; margin-bottom:22px;}
-  header h1{font-size:26px; color:var(--primary-dark); font-weight:700; letter-spacing:.5px;}
-  header .sub{color:var(--muted); font-size:14px; margin-top:6px; max-width:640px; margin-left:auto; margin-right:auto;}
-  .badge{display:inline-block; background:var(--primary); color:#fff; font-size:12px; padding:3px 12px; border-radius:999px; margin-top:10px; letter-spacing:1px;}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:18px; box-shadow:0 2px 8px rgba(15,111,106,.06);}
-  .card h2{font-size:18px; color:var(--primary-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px;}
-  .card h2 .n{background:var(--primary); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:none;}
-  .field{margin-bottom:16px;}
-  .field label{display:block; font-size:14px; font-weight:600; margin-bottom:6px; color:var(--ink);}
-  .field .hint{font-weight:400; color:var(--muted); font-size:12px;}
-  .row{display:flex; gap:10px; align-items:center;}
-  .row input[type=number]{flex:1; padding:12px 14px; font-size:16px; border:1.5px solid var(--border); border-radius:10px; outline:none; transition:border .15s; min-width:0;}
-  .row input[type=number]:focus{border-color:var(--accent);}
-  .row input[type=number].bad{border-color:var(--no); background:#fff5f5;}
-  .unit-switch{display:flex; background:#eef2f2; border-radius:10px; padding:3px; flex:none;}
-  .unit-switch button{border:none; background:transparent; padding:8px 12px; font-size:13px; cursor:pointer; border-radius:8px; color:var(--muted); white-space:nowrap;}
-  .unit-switch button.on{background:#fff; color:var(--primary-dark); font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.12);}
-  .radio-group{display:flex; flex-wrap:wrap; gap:8px;}
-  .radio-group label{display:inline-flex; align-items:center; gap:6px; font-weight:500; font-size:14px; padding:8px 14px; border:1.5px solid var(--border); border-radius:10px; cursor:pointer; transition:.15s; background:#fafbfb;}
-  .radio-group label:hover{border-color:var(--accent);}
-  .radio-group label.sel{border-color:var(--primary); background:#eef6f5; color:var(--primary-dark); font-weight:700;}
-  .radio-group input{accent-color:var(--primary);}
-  .calc-btn{width:100%; padding:15px; font-size:17px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--accent),var(--primary)); border:none; border-radius:12px; cursor:pointer; letter-spacing:2px; transition:transform .1s, opacity .2s;}
-  .calc-btn:hover{opacity:.94;}
-  .calc-btn:active{transform:scale(.99);}
-  .result{display:none;}
-  .result.show{display:block;}
-  .placeholder{color:var(--muted); font-size:14px; text-align:center; padding:18px; background:#f8fafc; border:1px dashed var(--border); border-radius:12px;}
-  .crit{display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-radius:10px; margin-bottom:8px; font-size:14px; gap:10px; flex-wrap:wrap;}
-  .crit.ok{background:var(--ok-bg);}
-  .crit.no{background:var(--no-bg);}
-  .crit .tag{font-weight:700;}
-  .crit.ok .tag{color:var(--ok);}
-  .crit.no .tag{color:var(--no);}
-  .verdict{margin-top:14px; padding:18px; border-radius:12px; font-size:15px; font-weight:700; text-align:center; line-height:1.7;}
-  .verdict.upa{background:#0f6f6a; color:#fff;}
-  .verdict.not{background:#f59e0b; color:#fff;}
-  .verdict small{display:block; font-weight:400; font-size:13px; margin-top:6px; opacity:.95; line-height:1.6;}
-  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
-  table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:460px;}
-  th,td{padding:9px 8px; text-align:center; border-bottom:1px solid var(--border); vertical-align:middle;}
-  th{background:#f0f6f5; color:var(--primary-dark); font-weight:700;}
-  td.left, th.left{text-align:left;}
-  .ref{font-size:13px; color:var(--muted);}
-  .ref li{margin-bottom:8px;}
-  .ref a{color:var(--primary); text-decoration:none;}
-  .ref a:hover{text-decoration:underline;}
-  .warn{background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; font-size:13px; border-radius:10px; padding:12px 14px; margin-top:12px;}
-  .okbox{background:#eef6ff; border:1px solid #bfdbfe; color:#1e40af; font-size:13px; border-radius:10px; padding:12px 14px; margin-top:12px;}
-  .nobox{background:#fef2f2; border:1px solid #fecaca; color:#991b1b; font-size:13px; border-radius:10px; padding:12px 14px; margin-top:12px;}
-  .flow{list-style:none; counter-reset:step;}
-  .flow li{position:relative; padding:0 0 14px 30px; font-size:14px; color:var(--ink);}
-  .flow li:before{counter-increment:step; content:counter(step); position:absolute; left:0; top:0; width:22px; height:22px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px;}
-  .flow li:not(:last-child):after{content:''; position:absolute; left:10px; top:24px; bottom:2px; width:2px; background:var(--border);}
-  .model-rule{background:#f0f6f5; border:1px solid #cfe5e2; border-radius:12px; padding:14px 16px; margin:12px 0; font-size:14px;}
-  .model-rule b{color:var(--primary-dark);}
-  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:20px;}
-  @media (max-width:560px){
-    body{padding:14px 10px 36px;}
-    header h1{font-size:22px;}
-    .card{padding:18px 14px;}
-    .row{flex-wrap:wrap;}
-    .unit-switch{width:100%; justify-content:center;}
-    .calc-btn{font-size:16px; letter-spacing:1px;}
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 42px; }
+  header { display: grid; gap: 8px; margin-bottom: 18px; }
+  h1 { margin: 0; color: var(--primary-strong); font-size: clamp(24px, 3vw, 34px); line-height: 1.25; }
+  .lead { max-width: 840px; margin: 0; color: var(--muted); font-size: 15px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .badge { display: inline-flex; align-items: center; min-height: 28px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: #fff; color: var(--primary-strong); font-size: 13px; font-weight: 700; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 2px; }
+  .tool-btn {
+    min-height: 38px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--primary-strong);
+    padding: 7px 11px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .tool-btn:hover { border-color: var(--primary); background: var(--surface-2); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 0.82fr); gap: 16px; align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; box-shadow: 0 1px 5px rgba(16, 50, 47, 0.04); }
+  .panel + .panel { margin-top: 16px; }
+  h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: var(--primary-strong); font-size: 19px; line-height: 1.35; }
+  .num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend, label { font-weight: 700; font-size: 14px; }
+  .hint { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .field { display: grid; gap: 7px; margin-bottom: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  input[type="number"] {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 16px;
+  }
+  input[type="number"]:focus { border-color: var(--primary); outline: 3px solid rgba(11, 107, 99, 0.12); }
+  input.bad { border-color: var(--bad); background: var(--bad-bg); }
+  .unit-switch, .radio-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .unit-switch { flex: 0 0 auto; padding: 3px; border-radius: 8px; background: #eef2f2; }
+  .unit-switch button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    padding: 7px 11px;
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .unit-switch button.on { background: #fff; color: var(--primary-strong); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+  .radio-group label, .checkline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 40px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: #fbfcfc;
+    padding: 7px 11px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .radio-group label.sel, .checkline.sel { border-color: var(--primary); background: var(--surface-2); color: var(--primary-strong); }
+  input[type="radio"], input[type="checkbox"] { accent-color: var(--primary); }
+  .checks { display: grid; gap: 8px; margin-bottom: 14px; }
+  .action { width: 100%; min-height: 50px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; }
+  .action:hover { background: var(--primary-strong); }
+  .placeholder { border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); text-align: center; background: #f9fbfb; }
+  .issue-list { display: grid; gap: 8px; margin-bottom: 12px; }
+  .issue, .note { border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .issue.error { background: var(--bad-bg); border: 1px solid #ffc9c2; color: var(--bad); }
+  .issue.warning { background: var(--warn-bg); border: 1px solid #f6d48b; color: var(--warn); }
+  .issue.scope { background: var(--scope-bg); border: 1px solid #c7d9ff; color: var(--scope); }
+  .issue.info { background: var(--soft-bg); border: 1px solid var(--line); color: var(--soft); }
+  .note { background: #f6faf9; border: 1px solid var(--line); color: var(--muted); }
+  .criteria { display: grid; gap: 8px; }
+  .crit { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .crit.ok { background: var(--ok-bg); }
+  .crit.no { background: var(--bad-bg); }
+  .tag { font-weight: 800; }
+  .crit.ok .tag { color: var(--ok); }
+  .crit.no .tag { color: var(--bad); }
+  .value { color: var(--muted); text-align: right; }
+  .verdict { margin-top: 12px; border-radius: 8px; padding: 14px; font-weight: 800; }
+  .verdict strong { display: block; margin-bottom: 3px; font-size: 17px; }
+  .verdict p { margin: 0; font-weight: 500; font-size: 14px; }
+  .verdict.positive { background: var(--primary); color: #fff; }
+  .verdict.invalid { background: var(--bad-bg); color: var(--bad); border: 1px solid #ffc9c2; }
+  .verdict.scope { background: var(--scope-bg); color: var(--scope); border: 1px solid #c7d9ff; }
+  .verdict.negative { background: var(--warn-bg); color: var(--warn); border: 1px solid #f6d48b; }
+  .result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .toast { margin-top: 10px; color: var(--muted); font-size: 13px; }
+  .rule-list { margin: 0; padding-left: 20px; }
+  .rule-list li { margin: 5px 0; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13.5px; }
+  th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: top; }
+  th { background: var(--surface-2); color: var(--primary-strong); }
+  td:first-child, th:first-child { text-align: left; }
+  .small { color: var(--muted); font-size: 13px; }
+  a { color: var(--primary); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  footer { margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center; }
+  @media (max-width: 880px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 16px 10px 32px; }
+    .panel { padding: 15px 12px; }
+    .row { flex-wrap: wrap; }
+    .unit-switch { width: 100%; }
+    .unit-switch button { flex: 1; }
+    .toolbar, .result-actions { display: grid; grid-template-columns: 1fr; }
+    .crit { grid-template-columns: 1fr; gap: 2px; }
+    .value { text-align: left; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-
   <header>
     <h1>CONPASS 单侧原发性醛固酮增多症预测模型</h1>
-    <div class="sub">Chongqing Primary Aldosteronism Study · 高特异度筛出<b>一小部分</b>高度疑似单侧 PA 的患者，作为「是否考虑免 AVS」的辅助参考——<b>不是替代 AVS 的通用决策器</b></div>
-    <span class="badge">Song 2022 建模 · 中华内科杂志 2026 再验证</span>
+    <p class="lead">用于已确诊 PA 患者分型阶段的高特异度辅助规则。它可以筛出一小部分高度疑似 UPA 的患者，但不是替代 AVS 的通用决策器。</p>
+    <div class="badge-row">
+      <span class="badge">Song 2022 建模</span>
+      <span class="badge">中华内科杂志 2026 再验证</span>
+      <span class="badge">规则透明，可自动审计</span>
+    </div>
   </header>
 
-  <div class="card">
-    <h2><span class="n">1</span>适用前提（先读，再决定是否可用）</h2>
-    <div class="okbox">✅ <b>本模型适用的人群</b>：已确诊 PA、正在分型/拟手术治疗；肾素用<b>直接肾素浓度 DRC</b>（化学发光法）测定；肾上腺 CT 可<b>明确判读单侧结节</b>。</div>
-    <div class="nobox">❌ <b>本模型不适用于</b>：PA 初筛或一般高血压人群；用「肾素活性 PRA」替代 DRC；无结节 / 双侧结节 / 影像不确定；醛固酮用质谱法测定（切点未在原研究验证）。</div>
-    <div class="warn" style="margin-top:12px;">⚠️ 即便结果「符合标准」，是否免 AVS、是否手术，仍须由内分泌专科/肾上腺多学科团队综合判断；本工具只提供模型层面的参考。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">2</span>输入患者指标</h2>
-
-    <div class="field">
-      <label for="K">① 血清钾 <span class="hint">（mmol/L · 正常约 3.5–5.5）</span></label>
-      <div class="row">
-        <input type="number" id="K" step="0.01" min="1" max="10" placeholder="如 3.2">
-        <div class="unit-switch"><button type="button" class="on" aria-pressed="true">mmol/L</button></div>
+  <main class="grid">
+    <section>
+      <div class="panel">
+        <h2><span class="num">1</span>适用性确认</h2>
+        <div class="checks">
+          <label class="checkline sel" id="confirmedPaLine"><input id="confirmedPa" type="checkbox" checked> 已确诊 PA，当前用于分型或拟手术评估</label>
+        </div>
+        <fieldset class="field">
+          <legend>肾素指标</legend>
+          <div class="radio-group" id="reninMethod">
+            <label class="sel"><input type="radio" name="reninMethod" value="drc" checked> DRC / PRC，mU/L</label>
+            <label><input type="radio" name="reninMethod" value="pra"> PRA，ng/mL/h</label>
+            <label><input type="radio" name="reninMethod" value="unknown"> 不确定</label>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>PAC 检测方法</legend>
+          <div class="radio-group" id="pacMethod">
+            <label class="sel"><input type="radio" name="pacMethod" value="immunoassay" checked> 免疫法/与原研究接近</label>
+            <label><input type="radio" name="pacMethod" value="lcms"> LC-MS/MS</label>
+            <label><input type="radio" name="pacMethod" value="unknown"> 不确定</label>
+          </div>
+        </fieldset>
+        <p class="note">若适用性不满足，页面仍会列出四项阈值是否满足，但结果会降级为“模型不适用”。</p>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="PAC">② 血浆醛固酮浓度 PAC</label>
-      <div class="row">
-        <input type="number" id="PAC" step="0.1" min="0" max="5000" placeholder="如 280">
-        <div class="unit-switch" id="pacUnit">
-          <button type="button" data-f="1" class="on" aria-pressed="true">pg/mL</button>
-          <button type="button" data-f="2.77" aria-pressed="false">pmol/L</button>
+      <div class="panel">
+        <h2><span class="num">2</span>输入患者指标</h2>
+        <div class="field">
+          <label for="potassium">血清钾 <span class="hint">mmol/L</span></label>
+          <div class="row">
+            <input id="potassium" type="number" step="0.01" min="1" max="10" placeholder="如 3.20" inputmode="decimal">
+            <div class="unit-switch"><button type="button" class="on" aria-pressed="true">mmol/L</button></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="pac">血浆醛固酮浓度 PAC</label>
+          <div class="row">
+            <input id="pac" type="number" step="0.1" min="0" max="5000" placeholder="如 280" inputmode="decimal">
+            <div class="unit-switch" id="pacUnit">
+              <button type="button" data-unit="pg/mL" class="on" aria-pressed="true">pg/mL</button>
+              <button type="button" data-unit="pmol/L" aria-pressed="false">pmol/L</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="renin">血浆肾素浓度 PRC / DRC <span class="hint">mU/L</span></label>
+          <div class="row">
+            <input id="renin" type="number" step="0.01" min="0" max="200" placeholder="如 2.0" inputmode="decimal">
+            <div class="unit-switch"><button type="button" class="on" aria-pressed="true">mU/L</button></div>
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend>肾上腺 CT 结节情况</legend>
+          <div class="radio-group" id="ctChoice">
+            <label class="sel"><input type="radio" name="ct" value="single" checked> 明确单侧结节</label>
+            <label><input type="radio" name="ct" value="none"> 无结节</label>
+            <label><input type="radio" name="ct" value="bilateral"> 双侧结节</label>
+            <label><input type="radio" name="ct" value="unclear"> 影像不确定</label>
+          </div>
+        </fieldset>
+
+        <div class="field" id="noduleSize">
+          <label for="nodule">单侧结节最大直径</label>
+          <div class="row">
+            <input id="nodule" type="number" step="0.1" min="0" max="100" placeholder="如 15" inputmode="decimal">
+            <div class="unit-switch" id="noduleUnit">
+              <button type="button" data-unit="mm" class="on" aria-pressed="true">mm</button>
+              <button type="button" data-unit="cm" aria-pressed="false">cm</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="action" id="calculate" type="button">判断 CONPASS 结果</button>
+        <div class="toolbar" aria-label="示例和清空">
+          <button class="tool-btn" type="button" data-demo="positive">填入阳性边界例</button>
+          <button class="tool-btn" type="button" data-demo="negative">填入未满足例</button>
+          <button class="tool-btn" type="button" id="resetForm">清空</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="field">
-      <label for="PRC">③ 血浆肾素浓度 PRC <span class="hint">（直接肾素浓度 DRC，mU/L）</span></label>
-      <div class="row">
-        <input type="number" id="PRC" step="0.01" min="0" max="200" placeholder="如 2.0">
-        <div class="unit-switch"><button type="button" class="on" aria-pressed="true">mU/L</button></div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>④ 肾上腺 CT 结节情况 <span class="hint">（模型仅针对「明确单侧结节」）</span></label>
-      <div class="radio-group" id="nodChoice">
-        <label class="sel"><input type="radio" name="nodule" value="single" checked> 单侧结节</label>
-        <label><input type="radio" name="nodule" value="none"> 无结节</label>
-        <label><input type="radio" name="nodule" value="bilateral"> 双侧结节</label>
-        <label><input type="radio" name="nodule" value="unclear"> 影像不确定</label>
-      </div>
-      <div class="row" id="noduleSize" style="margin-top:12px;">
-        <input type="number" id="NODULE" step="0.1" min="0" max="100" placeholder="如 15（单侧结节最大直径）">
-        <div class="unit-switch" id="nodUnit">
-          <button type="button" data-f="1" class="on" aria-pressed="true">mm</button>
-          <button type="button" data-f="10" aria-pressed="false">cm</button>
+    <aside>
+      <div class="panel" id="resultPanel" aria-live="polite">
+        <h2><span class="num">3</span>判定结果</h2>
+        <div class="placeholder" id="placeholder">填写指标后生成结果、适用性提示和四项阈值核对。</div>
+        <div id="resultBody" hidden>
+          <div class="issue-list" id="issuePanel"></div>
+          <div class="criteria" id="criteriaPanel"></div>
+          <div id="verdictPanel"></div>
+          <div class="result-actions">
+            <button class="tool-btn" id="copyResult" type="button">复制结果摘要</button>
+          </div>
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
         </div>
       </div>
-    </div>
 
-    <div class="warn">⚠️ 肾素须为「直接肾素浓度 DRC（mU/L）」。若你手里是「肾素活性 PRA（ng/ml/h）」，两者不是同一指标，本模型切点不适用。</div>
+      <div class="panel">
+        <h2><span class="num">4</span>规则</h2>
+        <ol class="rule-list">
+          <li>血清钾 ≤ 3.5 mmol/L</li>
+          <li>PAC ≥ 200 pg/mL（= 554 pmol/L）</li>
+          <li>PRC / DRC ≤ 5 mU/L</li>
+          <li>CT 明确单侧结节且直径 ≥ 10 mm</li>
+        </ol>
+        <p class="note">四项必须同时满足。未满足不等于双侧 PA，仍需按指南路径完成分型。</p>
+      </div>
+    </aside>
+  </main>
 
-    <button class="calc-btn" id="calc" style="margin-top:18px;">判 断 是 否 单 侧 PA</button>
-  </div>
-
-  <div class="card" id="result">
-    <h2><span class="n">3</span>判定结果</h2>
-    <div class="placeholder" id="placeholder">请先填写上方指标并点击「判断」，结果与解读将显示在这里。</div>
-    <div id="resultBody" style="display:none;">
-      <div id="warnList"></div>
-      <div id="crits"></div>
-      <div id="verdict"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span>模型规则（复现自原始文献）</h2>
-    <div class="model-rule">判定为「单侧 PA (UPA)」需<b>同时满足全部 4 条</b>：</div>
-    <div class="model-rule" style="margin-top:0;">
-      ① 血清钾 <b>≤ 3.5</b> mmol/L<br>
-      ② 血浆醛固酮浓度 PAC <b>≥ 200</b> pg/mL（= 554 pmol/L）<br>
-      ③ 血浆肾素浓度 PRC <b>≤ 5</b> mU/L<br>
-      ④ 肾上腺 CT 示<b>单侧结节</b>且直径 <b>≥ 10</b> mm
-    </div>
-    <div class="okbox">💡 该模型<b>取消了年龄限制</b>。现行 2025 美国内分泌学会指南要求「年龄 &lt;35 岁」，但全球 UPA 平均诊断年龄约 49 岁；本模型识别的 UPA 患者中 93.8% 年龄 ≥35 岁——这是它敏感度远高于指南标准的原因。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">5</span>性能对比（四个队列 / 标准）</h2>
+  <section class="panel">
+    <h2><span class="num">5</span>性能与边界</h2>
     <div class="table-wrap">
       <table>
-        <tr><th class="left">模型 / 标准</th><th>敏感度</th><th>特异度</th><th>阳性预测值</th><th>阴性预测值</th></tr>
-        <tr><td class="left">CONPASS 开发队列<br><span style="color:var(--muted);font-size:12px;">Song 2022 中国重庆 · n=356 (UPA 268/BPA 88)</span></td><td>52%</td><td>100%</td><td>—</td><td>—</td></tr>
-        <tr><td class="left">CONPASS 外部验证队列<br><span style="color:var(--muted);font-size:12px;">Song 2022 澳大利亚 · n=201 (UPA 84/BPA 117)</span></td><td>13%</td><td>100%</td><td>—</td><td>—</td></tr>
-        <tr><td class="left"><b>CONPASS 再验证队列</b><br><span style="color:var(--muted);font-size:12px;">中华内科杂志 2026 重庆 · n=267 (UPA 151/BPA 116)</span></td><td><b>31.8%</b></td><td><b>98.3%</b></td><td><b>96.0%</b></td><td><b>52.5%</b></td></tr>
-        <tr><td class="left">美国内分泌学会指南标准<br><span style="color:var(--muted);font-size:12px;">同一再验证队列</span></td><td>2.0%</td><td>100%</td><td>—</td><td>—</td></tr>
+        <thead>
+          <tr><th>模型 / 标准</th><th>敏感度</th><th>特异度</th><th>阳性预测值</th><th>阴性预测值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CONPASS 开发队列<br><span class="small">Song 2022，中国重庆，n=356（UPA 268 / BPA 88）</span></td><td>52%</td><td>100%</td><td>未列</td><td>未列</td></tr>
+          <tr><td>CONPASS 外部验证队列<br><span class="small">Song 2022，澳大利亚，n=201（UPA 84 / BPA 117）</span></td><td>13%</td><td>100%</td><td>未列</td><td>未列</td></tr>
+          <tr><td>CONPASS 再验证队列<br><span class="small">中华内科杂志 2026，重庆，n=267（UPA 151 / BPA 116）</span></td><td>31.8%</td><td>98.3%</td><td>96.0%</td><td>52.5%</td></tr>
+          <tr><td>2025 Endocrine Society 指南中可考虑免 AVS 的年轻典型例外<br><span class="small">同一 2026 再验证队列比较</span></td><td>2.0%</td><td>100%</td><td>未列</td><td>未列</td></tr>
+        </tbody>
       </table>
     </div>
-    <div style="font-size:12.5px; color:var(--muted); margin-top:10px; line-height:1.7;">
-      敏感度跨队列波动大（<b>13%–52%</b>），即模型只能识别一小部分单侧 PA，且在不同人群差异明显；特异度始终很高（98.3%–100%），即「判单侧」的假阳性很少。<br>
-      在 2026 再验证队列中，阳性预测值 96.0%（判单侧者中 96% 确为单侧）。<b>此值依赖该队列中单侧 PA 的比例，换到单侧比例更低的人群，阳性预测值会相应下降。</b>
-    </div>
-  </div>
+    <p class="small">2025 Endocrine Society 指南仍建议拟手术 PA 患者在决定治疗路径前进行 CT + AVS；可考虑不做 AVS 的典型例外包括年龄 &lt;35 岁、显著 PA、低钾、肾素抑制和 CT 单侧肾上腺腺瘤。CONPASS 的阳性预测值依赖队列中 UPA 比例，换到不同人群时不能直接照搬。</p>
+  </section>
 
-  <div class="card">
-    <h2><span class="n">6</span>模型是如何建立的（方法复现）</h2>
-    <ol class="flow">
-      <li><b>队列</b>：重庆原发性醛固酮增多症队列 CONPASS，共 356 例确诊 PA 患者（UPA 268 / BPA 88），以 AVS 或术后生化缓解为分型金标准。</li>
-      <li><b>候选变量</b>：临床特征（年龄、血钾）、生化指标（PAC、PRC）、影像（CT 单侧结节及大小）等。</li>
-      <li><b>变量筛选</b>：多因素 Logistic 回归识别与单侧病变独立相关的预测因子。</li>
-      <li><b>切点确定</b>：对入选连续变量逐一枚举/优化诊断切点（血钾 ≤3.5、PAC ≥200 pg/mL、PRC ≤5 mU/L、结节 ≥10 mm），优先保证特异度接近 100%（避免把双侧误判为单侧而错误手术）。</li>
-      <li><b>形成规则</b>：最终为「4 条件同时满足」的规则模型（AND 逻辑），并在澳大利亚外部队列（201 例）验证。</li>
+  <section class="panel">
+    <h2><span class="num">6</span>自动审计</h2>
+    <p class="small">配套脚本 <code>audit-conpass.js</code> 会生成阈值边界、单位换算、CT 类型、异常值、适用性降级和 5000 条随机数据，逐条核对纯模型输出。每次改动后运行 <code>node audit-conpass.js</code>。</p>
+  </section>
+
+  <section class="panel">
+    <h2><span class="num">7</span>来源</h2>
+    <ol class="small">
+      <li>Song Y, Yang J, Shen H, et al. <i>Journal of Hypertension</i>, 2022;40(9):1692-1701. <a href="https://pubmed.ncbi.nlm.nih.gov/35881462/" target="_blank" rel="noopener noreferrer">PMID 35881462</a></li>
+      <li>杨淑敏, 魏馨, 宋颖, 等. <i>中华内科杂志</i>, 2026;65(7):717-724. <a href="https://pubmed.ncbi.nlm.nih.gov/42427044/" target="_blank" rel="noopener noreferrer">PMID 42427044</a></li>
+      <li>Endocrine Society. Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. 2025. <a href="https://www.endocrine.org/clinical-practice-guidelines/primary-aldosteronism-2" target="_blank" rel="noopener noreferrer">指南页面</a></li>
     </ol>
-    <div class="okbox">📌 原始论文为付费全文（LWW），Logistic 回归的 OR/β 系数需订阅方能查看；但<b>最终临床决策规则与全部切点均已明确</b>，可直接复现与使用。本地数据复现可用配套脚本 conpass_predict.py。</div>
-  </div>
+    <p class="note">本工具仅供科研与教学参考，不构成临床诊断或治疗决策依据。</p>
+  </section>
 
-  <div class="card">
-    <h2><span class="n">7</span>模型来源</h2>
-    <ol class="ref">
-      <li>杨淑敏, 魏馨, 宋颖, 等. 单侧原发性醛固酮增多症预测模型再验证. <i>中华内科杂志</i>, 2026, 65(7). <a href="https://pubmed.ncbi.nlm.nih.gov/42427044/" target="_blank" rel="noopener noreferrer">PMID 42427044 →</a> <a href="https://rs.yiigle.com/cmaid/1687020" target="_blank" rel="noopener noreferrer">原文 →</a></li>
-      <li>Song Y, Yang J, Shen H, et al. Development and validation of model for sparing adrenal venous sampling in diagnosing unilateral primary aldosteronism. <i>J Hypertens</i>, 2022, 40(9):1692-1701. <a href="https://pubmed.ncbi.nlm.nih.gov/35881462/" target="_blank" rel="noopener noreferrer">PMID 35881462 →</a> <a href="https://doi.org/10.1097/HJH.0000000000003197" target="_blank" rel="noopener noreferrer">DOI →</a></li>
-      <li>Endocrine Society. Clinical practice guideline: management of primary aldosteronism. <a href="https://www.endocrine.org/clinical-practice-guidelines/primary-aldosteronism-2" target="_blank" rel="noopener noreferrer">2025 指南 →</a></li>
-    </ol>
-    <div class="warn">本工具仅供科研与教学参考，<b>不构成临床诊断或治疗决策依据</b>。是否免 AVS、是否手术，须由内分泌专科/肾上腺多学科团队综合评估。PRC 采用化学发光法（LIAISON, DiaSorin）测定；若用质谱法测醛固酮或以肾素活性代替肾素浓度，切点需重新验证。</div>
-  </div>
-
-  <footer>CONPASS 模型 · 血钾≤3.5 且 醛固酮≥200 pg/mL 且 肾素≤5 mU/L 且 单侧结节≥10 mm · 取消年龄限制</footer>
+  <footer>CONPASS model calculator. High specificity, limited sensitivity, transparent rule audit.</footer>
 </div>
 
+<script src="./conpass-model.js"></script>
 <script>
-(function(){
-  var pacF = 1, nodF = 1;
-  var nodChoice = 'single';
+(function () {
+  "use strict";
+  var state = { pacUnit: "pg/mL", noduleUnit: "mm", lastResult: null, lastInput: null };
 
-  function setPressed(btn, on){
-    btn.classList.toggle('on', on);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
-  document.getElementById('pacUnit').addEventListener('click', function(e){
-    if(e.target.tagName !== 'BUTTON') return;
-    pacF = parseFloat(e.target.dataset.f);
-    Array.from(e.target.parentElement.children).forEach(b=>setPressed(b, b===e.target));
-  });
-  document.getElementById('nodUnit').addEventListener('click', function(e){
-    if(e.target.tagName !== 'BUTTON') return;
-    nodF = parseFloat(e.target.dataset.f);
-    Array.from(e.target.parentElement.children).forEach(b=>setPressed(b, b===e.target));
-  });
-
-  // CT 结节情况选择
-  var sizeRow = document.getElementById('noduleSize');
-  document.getElementById('nodChoice').addEventListener('change', function(e){
-    if(e.target.name !== 'nodule') return;
-    nodChoice = e.target.value;
-    Array.from(e.target.parentElement.children).forEach(function(lb){
-      lb.classList.toggle('sel', lb.querySelector('input').checked);
+  function byId(id) { return document.getElementById(id); }
+  function selected(name) { return document.querySelector('input[name="' + name + '"]:checked').value; }
+  function setPressed(group, button) {
+    Array.prototype.forEach.call(group.querySelectorAll("button"), function (btn) {
+      var on = btn === button;
+      btn.classList.toggle("on", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    sizeRow.style.display = (nodChoice === 'single') ? 'flex' : 'none';
-  });
-
-  function badInput(el, bad){ el.classList.toggle('bad', bad); }
-
-  document.getElementById('calc').addEventListener('click', function(){
-    var K = parseFloat(document.getElementById('K').value);
-    var pac = parseFloat(document.getElementById('PAC').value);
-    var prc = parseFloat(document.getElementById('PRC').value);
-    var nod = parseFloat(document.getElementById('NODULE').value);
-    var PAC = pac / pacF;      // 统一成 pg/mL
-    var NOD = nod * nodF;      // 统一成 mm
-
-    var kEl=document.getElementById('K'), pEl=document.getElementById('PAC'),
-        rEl=document.getElementById('PRC'), nEl=document.getElementById('NODULE');
-    badInput(kEl,false); badInput(pEl,false); badInput(rEl,false); badInput(nEl,false);
-
-    // —— 硬阻断：缺值 / 荒谬值 ——
-    if(isNaN(K) || isNaN(pac) || isNaN(prc)){
-      alert('请把血钾、醛固酮、肾素三项都填上。');
+  }
+  function syncRadioStyles(group) {
+    Array.prototype.forEach.call(group.querySelectorAll("label"), function (label) {
+      label.classList.toggle("sel", label.querySelector("input").checked);
+    });
+  }
+  function fmt(value, digits, suffix) {
+    if (!Number.isFinite(value)) return "未填写";
+    return value.toFixed(digits) + (suffix || "");
+  }
+  function issueClass(severity) {
+    if (severity === "error") return "error";
+    if (severity === "scope") return "scope";
+    return "warning";
+  }
+  function setInput(id, value) {
+    byId(id).value = value === null || value === undefined ? "" : String(value);
+  }
+  function setRadio(name, value) {
+    var input = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
+    if (input) {
+      input.checked = true;
+      syncRadioStyles(input.closest(".radio-group"));
+    }
+  }
+  function renderIssues(result) {
+    var panel = byId("issuePanel");
+    panel.innerHTML = "";
+    if (!result.issues.length) {
+      var div = document.createElement("div");
+      div.className = "issue info";
+      div.innerHTML = "<strong>适用性和输入范围未见阻断问题</strong><br>仍需结合患者、影像、检测方法和专科判断。";
+      panel.appendChild(div);
       return;
     }
-    if(nodChoice==='single' && isNaN(nod)){
-      alert('请填写单侧结节的最大直径（mm 或 cm）。');
-      nEl.focus(); return;
-    }
-    var errs=[];
-    if(K < 1 || K > 10){ badInput(kEl,true); errs.push('血清钾 '+K+' mmol/L 超出合理范围（正常约 3.5–5.5）。'); }
-    if(PAC < 0 || PAC > 5000){ badInput(pEl,true); errs.push('醛固酮 '+PAC.toFixed(0)+' pg/mL 超出合理范围。'); }
-    if(prc < 0 || prc > 200){ badInput(rEl,true); errs.push('肾素 '+prc+' mU/L 超出合理范围。'); }
-    if(nodChoice==='single' && (NOD < 0 || NOD > 100)){ badInput(nEl,true); errs.push('结节直径 '+NOD.toFixed(1)+' mm 超出合理范围。'); }
-    if(errs.length){
-      alert('请先核对以下异常值：\n\n· '+errs.join('\n· '));
-      return;
-    }
-
-    // —— 软警告：偏离常见范围，但不阻断 ——
-    var warns=[];
-    if(K < 2.0 || K > 6.5) warns.push('血清钾 '+K+' mmol/L 偏离常见范围，请核对是否为真实测定值。');
-    if(PAC > 1000) warns.push('醛固酮超出原研究检测上限（1000 pg/mL），切点适用性存疑。');
-    if(prc < 0.53) warns.push('肾素低于原研究检测下限（0.53 mU/L）。');
-    if(nodChoice==='single' && NOD > 50) warns.push('结节直径偏大，请核对单位与数值。');
-
-    var c1 = K <= 3.5;
-    var c2 = PAC >= 200;
-    var c3 = prc <= 5;
-    var c4 = (nodChoice === 'single') && (NOD >= 10);
-    var isUPA = c1 && c2 && c3 && c4;
-
-    var crits = [
-      {ok:c1, txt:'① 血清钾 ≤ 3.5 mmol/L', val:K+' mmol/L'},
-      {ok:c2, txt:'② 醛固酮 ≥ 200 pg/mL', val:PAC.toFixed(1)+' pg/mL'},
-      {ok:c3, txt:'③ 肾素 ≤ 5 mU/L', val:prc+' mU/L'},
-      {ok:c4, txt:'④ 单侧结节 ≥ 10 mm', val:(nodChoice==='single' ? NOD.toFixed(1)+' mm' : ({none:'无结节',bilateral:'双侧结节',unclear:'影像不确定'}[nodChoice]))}
+    result.issues.forEach(function (issue) {
+      var div = document.createElement("div");
+      div.className = "issue " + issueClass(issue.severity);
+      div.innerHTML = "<strong>" + issue.title + "</strong><br>" + issue.detail;
+      panel.appendChild(div);
+    });
+  }
+  function renderCriteria(result) {
+    var n = result.normalized;
+    var rows = [
+      ["potassium", "血清钾 ≤ 3.5 mmol/L", fmt(n.potassium, 2, " mmol/L")],
+      ["pac", "PAC ≥ 200 pg/mL", fmt(n.pacPgMl, 1, " pg/mL")],
+      ["renin", "PRC / DRC ≤ 5 mU/L", fmt(n.renin, 2, " mU/L")],
+      ["ct", "CT 单侧结节 ≥ 10 mm", n.ct === "single" ? fmt(n.noduleMm, 1, " mm") : n.ctLabel]
     ];
-    var critsHtml = crits.map(function(c){
-      return '<div class="crit '+(c.ok?'ok':'no')+'">'+
-             '<span class="tag">'+(c.ok?'✅ 满足':'❌ 不满足')+'</span>'+
-             '<span>'+c.txt+'</span>'+
-             '<span style="color:var(--muted)">'+c.val+'</span></div>';
-    }).join('');
-
-    var verdict;
-    if(isUPA){
-      verdict = '<div class="verdict upa">符合 CONPASS 模型标准（4 项均满足）——可判为「高度疑似单侧 PA」'+
-                '<small>在多学科/专科评估下，可作为「是否考虑免 AVS」的辅助依据；是否手术仍需专科医生结合整体情况决定，不应仅凭此结果直接决定手术。</small></div>';
-    }else{
-      verdict = '<div class="verdict not">不符合全部标准——<b>不能据此排除单侧</b>，建议行 AVS 分型'+
-                '<small>模型敏感度有限（跨队列仅 13%–52%），阴性不代表一定是双侧，勿仅凭此放弃手术评估。</small></div>';
+    byId("criteriaPanel").innerHTML = rows.map(function (row) {
+      var ok = result.criteria[row[0]];
+      return '<div class="crit ' + (ok ? "ok" : "no") + '"><span class="tag">' + (ok ? "满足" : "不满足") + '</span><span>' + row[1] + '</span><span class="value">' + row[2] + '</span></div>';
+    }).join("");
+  }
+  function renderVerdict(result) {
+    var hasWarning = result.issues.some(function (issue) { return issue.severity === "warning"; });
+    var boxClass = "negative";
+    var title = "不符合全部 CONPASS 标准";
+    var text = "不能据此排除单侧 PA；模型敏感度有限，建议按指南路径完成 AVS 分型。";
+    if (result.status === "invalid") {
+      boxClass = "invalid";
+      title = "暂不能判定";
+      text = "存在缺失值或超出硬校验范围的输入，请先核对数据。";
+    } else if (result.status === "not_applicable") {
+      boxClass = "scope";
+      title = "模型不适用或需降级解释";
+      text = "当前资料不满足 CONPASS 的适用前提；不应据此给出免 AVS 或直接手术判断。";
+    } else if (result.status === "conpass_positive") {
+      boxClass = "positive";
+      title = hasWarning ? "符合 CONPASS 规则，但存在需核对项" : "符合 CONPASS 高特异度规则";
+      text = hasWarning
+        ? "四项阈值均满足，但存在检测范围或录入合理性提示；可作为辅助证据，需先核对报告后再讨论是否考虑免 AVS。"
+        : "可作为专科团队评估是否考虑免 AVS 的辅助证据；是否手术仍需结合指南、影像、检测方法和患者情况。";
     }
+    byId("verdictPanel").innerHTML = '<div class="verdict ' + boxClass + '"><strong>' + title + '</strong><p>' + text + '</p></div>';
+  }
+  function markBadInputs(result) {
+    ["potassium", "pac", "renin", "nodule"].forEach(function (id) { byId(id).classList.remove("bad"); });
+    result.issues.forEach(function (issue) {
+      if (issue.code.indexOf("potassium") === 0 || issue.code === "missing_potassium") byId("potassium").classList.add("bad");
+      if (issue.code.indexOf("pac") === 0 || issue.code === "missing_pac") byId("pac").classList.add("bad");
+      if (issue.code.indexOf("renin") === 0 || issue.code === "missing_renin") byId("renin").classList.add("bad");
+      if (issue.code.indexOf("nodule") === 0 || issue.code === "missing_nodule") byId("nodule").classList.add("bad");
+    });
+  }
+  function calculate() {
+    var input = {
+      confirmedPa: byId("confirmedPa").checked,
+      reninMethod: selected("reninMethod"),
+      pacMethod: selected("pacMethod"),
+      potassium: byId("potassium").value,
+      pac: byId("pac").value,
+      pacUnit: state.pacUnit,
+      renin: byId("renin").value,
+      ct: selected("ct"),
+      nodule: byId("nodule").value,
+      noduleUnit: state.noduleUnit
+    };
+    var result = window.ConpassModel.evaluate(input);
+    state.lastInput = input;
+    state.lastResult = result;
+    byId("placeholder").hidden = true;
+    byId("resultBody").hidden = false;
+    renderIssues(result);
+    renderCriteria(result);
+    renderVerdict(result);
+    markBadInputs(result);
+  }
+  function fillDemo(kind) {
+    byId("confirmedPa").checked = true;
+    byId("confirmedPaLine").classList.add("sel");
+    setRadio("reninMethod", "drc");
+    setRadio("pacMethod", "immunoassay");
+    setRadio("ct", "single");
+    byId("noduleSize").hidden = false;
+    state.pacUnit = "pg/mL";
+    state.noduleUnit = "mm";
+    setPressed(byId("pacUnit"), byId("pacUnit").querySelector('[data-unit="pg/mL"]'));
+    setPressed(byId("noduleUnit"), byId("noduleUnit").querySelector('[data-unit="mm"]'));
+    if (kind === "positive") {
+      setInput("potassium", 3.5);
+      setInput("pac", 200);
+      setInput("renin", 5);
+      setInput("nodule", 10);
+    } else {
+      setInput("potassium", 3.6);
+      setInput("pac", 205);
+      setInput("renin", 5);
+      setInput("nodule", 10);
+    }
+    calculate();
+  }
+  function resetForm() {
+    ["potassium", "pac", "renin", "nodule"].forEach(function (id) {
+      setInput(id, "");
+      byId(id).classList.remove("bad");
+    });
+    byId("confirmedPa").checked = true;
+    byId("confirmedPaLine").classList.add("sel");
+    setRadio("reninMethod", "drc");
+    setRadio("pacMethod", "immunoassay");
+    setRadio("ct", "single");
+    byId("noduleSize").hidden = false;
+    state.pacUnit = "pg/mL";
+    state.noduleUnit = "mm";
+    setPressed(byId("pacUnit"), byId("pacUnit").querySelector('[data-unit="pg/mL"]'));
+    setPressed(byId("noduleUnit"), byId("noduleUnit").querySelector('[data-unit="mm"]'));
+    state.lastInput = null;
+    state.lastResult = null;
+    byId("placeholder").hidden = false;
+    byId("resultBody").hidden = true;
+    byId("issuePanel").innerHTML = "";
+    byId("criteriaPanel").innerHTML = "";
+    byId("verdictPanel").innerHTML = "";
+  }
+  function buildSummary() {
+    if (!state.lastResult || !state.lastInput) return "";
+    var result = state.lastResult;
+    var n = result.normalized;
+    var issues = result.issues.map(function (issue) { return issue.title; }).join("; ") || "无阻断问题";
+    return [
+      "CONPASS 预测模型结果",
+      "状态: " + result.status,
+      "血清钾: " + fmt(n.potassium, 2, " mmol/L") + " (" + (result.criteria.potassium ? "满足" : "不满足") + ")",
+      "PAC: " + fmt(n.pacPgMl, 1, " pg/mL") + " (" + (result.criteria.pac ? "满足" : "不满足") + ")",
+      "PRC/DRC: " + fmt(n.renin, 2, " mU/L") + " (" + (result.criteria.renin ? "满足" : "不满足") + ")",
+      "CT: " + (n.ct === "single" ? fmt(n.noduleMm, 1, " mm") : n.ctLabel) + " (" + (result.criteria.ct ? "满足" : "不满足") + ")",
+      "提示: " + issues,
+      "说明: 本工具仅供科研与教学参考，不构成临床诊断或治疗决策依据。"
+    ].join("\n");
+  }
+  function copyResult() {
+    var text = buildSummary();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(function () {
+      byId("toast").textContent = "结果摘要已复制。";
+    }, function () {
+      byId("toast").textContent = "当前浏览器不允许自动复制，请手动选择结果文本。";
+    });
+  }
 
-    var warnHtml = warns.length
-      ? '<div class="warn">⚠️ '+warns.join('<br>⚠️ ')+'</div>'
-      : '';
-
-    document.getElementById('warnList').innerHTML = warnHtml;
-    document.getElementById('crits').innerHTML = critsHtml;
-    document.getElementById('verdict').innerHTML = verdict;
-    document.getElementById('placeholder').style.display = 'none';
-    document.getElementById('resultBody').style.display = 'block';
-    document.getElementById('result').scrollIntoView({behavior:'smooth', block:'nearest'});
+  byId("pacUnit").addEventListener("click", function (event) {
+    if (event.target.tagName !== "BUTTON") return;
+    state.pacUnit = event.target.dataset.unit;
+    setPressed(event.currentTarget, event.target);
   });
+  byId("noduleUnit").addEventListener("click", function (event) {
+    if (event.target.tagName !== "BUTTON") return;
+    state.noduleUnit = event.target.dataset.unit;
+    setPressed(event.currentTarget, event.target);
+  });
+  ["reninMethod", "pacMethod", "ctChoice"].forEach(function (id) {
+    byId(id).addEventListener("change", function (event) {
+      syncRadioStyles(event.currentTarget);
+      if (id === "ctChoice") {
+        byId("noduleSize").hidden = selected("ct") !== "single";
+      }
+    });
+  });
+  byId("confirmedPa").addEventListener("change", function () {
+    byId("confirmedPaLine").classList.toggle("sel", byId("confirmedPa").checked);
+  });
+  document.querySelectorAll("[data-demo]").forEach(function (button) {
+    button.addEventListener("click", function () { fillDemo(button.dataset.demo); });
+  });
+  byId("resetForm").addEventListener("click", resetForm);
+  byId("copyResult").addEventListener("click", copyResult);
+  byId("calculate").addEventListener("click", calculate);
 })();
 </script>
 </body>
