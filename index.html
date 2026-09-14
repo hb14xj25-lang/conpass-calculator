@@ -55,7 +55,7 @@
     font-weight: 700;
   }
   .tool-btn:hover { border-color: var(--primary); background: var(--surface-2); }
-  .grid { display: grid; grid-template-columns: minmax(430px, 1.03fr) minmax(420px, 0.97fr); gap: 20px; align-items: start; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr); gap: 20px; align-items: start; }
   aside { position: sticky; top: 14px; }
   .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: 0 1px 8px rgba(16, 50, 47, 0.05); }
   .panel + .panel { margin-top: 20px; }
@@ -116,22 +116,22 @@
   .action { width: 100%; min-height: 50px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; }
   .action:hover { background: var(--primary-strong); }
   .placeholder { border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); text-align: center; background: #f9fbfb; }
-  .issue-list { display: grid; gap: 8px; margin-bottom: 12px; }
+  .issue-list { display: grid; gap: 8px; margin: 12px 0; }
   .issue, .note { border-radius: 8px; padding: 11px 13px; font-size: 15px; }
   .issue.error { background: var(--bad-bg); border: 1px solid #ffc9c2; color: var(--bad); }
   .issue.warning { background: var(--warn-bg); border: 1px solid #f6d48b; color: var(--warn); }
   .issue.scope { background: var(--scope-bg); border: 1px solid #c7d9ff; color: var(--scope); }
   .issue.info { background: var(--soft-bg); border: 1px solid var(--line); color: var(--soft); }
   .note { background: #f6faf9; border: 1px solid var(--line); color: var(--muted); }
-  .criteria { display: grid; gap: 8px; }
-  .crit { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border-radius: 8px; padding: 12px 13px; font-size: 15px; }
+  .criteria { display: grid; gap: 8px; margin-top: 12px; }
+  .crit { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; align-items: start; border-radius: 8px; padding: 12px 13px; font-size: 15px; }
   .crit.ok { background: var(--ok-bg); }
   .crit.no { background: var(--bad-bg); }
   .tag { font-weight: 800; }
   .crit.ok .tag { color: var(--ok); }
   .crit.no .tag { color: var(--bad); }
-  .value { color: var(--muted); text-align: right; }
-  .verdict { margin-top: 12px; border-radius: 8px; padding: 14px; font-weight: 800; }
+  .value { grid-column: 2; color: var(--muted); text-align: left; }
+  .verdict { border-radius: 8px; padding: 16px; font-weight: 800; }
   .verdict strong { display: block; margin-bottom: 4px; font-size: 20px; }
   .verdict p { margin: 0; font-weight: 550; font-size: 15px; }
   .verdict.positive { background: var(--primary); color: #fff; }
@@ -150,7 +150,7 @@
   .small { color: var(--muted); font-size: 14px; }
   a { color: var(--primary); text-decoration-thickness: 1px; text-underline-offset: 2px; }
   footer { margin-top: 20px; color: var(--muted); font-size: 12px; text-align: center; }
-  @media (max-width: 980px) {
+  @media (max-width: 720px) {
     .grid { grid-template-columns: 1fr; }
     aside { position: static; }
   }
@@ -163,7 +163,7 @@
     .ct-cards { grid-template-columns: 1fr; }
     .toolbar, .result-actions { display: grid; grid-template-columns: 1fr; }
     .crit { grid-template-columns: 1fr; gap: 2px; }
-    .value { text-align: left; }
+    .value { grid-column: 1; text-align: left; }
   }
 </style>
 </head>
@@ -171,12 +171,6 @@
 <div class="wrap">
   <header>
     <h1>CONPASS 单侧原发性醛固酮增多症预测模型</h1>
-    <p class="lead">用于已确诊 PA 患者分型阶段的高特异度辅助规则。页面核心只回答一个问题：当前资料是否强烈支持“单侧 PA / UPA”。双侧病灶、无结节或影像不确定时，模型会自动降级为不适用。</p>
-    <div class="badge-row">
-      <span class="badge">Song 2022 建模</span>
-      <span class="badge">中华内科杂志 2026 再验证</span>
-      <span class="badge">规则透明，可自动审计</span>
-    </div>
   </header>
 
   <main class="grid">
@@ -269,9 +263,9 @@
         <h2><span class="num">3</span>单侧 PA 判断</h2>
         <div class="placeholder" id="placeholder">填写指标后生成“是否支持单侧 PA”的结论，并逐项显示 CT 侧别、结节大小和三项实验室阈值。</div>
         <div id="resultBody" hidden>
+          <div id="verdictPanel"></div>
           <div class="issue-list" id="issuePanel"></div>
           <div class="criteria" id="criteriaPanel"></div>
-          <div id="verdictPanel"></div>
           <div class="result-actions">
             <button class="tool-btn" id="copyResult" type="button">复制结果摘要</button>
           </div>
@@ -285,47 +279,14 @@
           <li>血清钾 ≤ 3.5 mmol/L</li>
           <li>PAC ≥ 200 pg/mL（= 554 pmol/L）</li>
           <li>PRC / DRC ≤ 5 mU/L</li>
-      <li>CT 明确单侧病灶，且该侧结节/腺瘤直径 ≥ 10 mm</li>
+          <li>CT 明确单侧病灶，且该侧结节/腺瘤直径 ≥ 10 mm</li>
         </ol>
         <p class="note">四项必须同时满足。未满足不等于双侧 PA，仍需按指南路径完成分型。</p>
       </div>
     </aside>
   </main>
 
-  <section class="panel">
-    <h2><span class="num">5</span>性能与边界</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>模型 / 标准</th><th>敏感度</th><th>特异度</th><th>阳性预测值</th><th>阴性预测值</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>CONPASS 开发队列<br><span class="small">Song 2022，中国重庆，n=356（UPA 268 / BPA 88）</span></td><td>52%</td><td>100%</td><td>未列</td><td>未列</td></tr>
-          <tr><td>CONPASS 外部验证队列<br><span class="small">Song 2022，澳大利亚，n=201（UPA 84 / BPA 117）</span></td><td>13%</td><td>100%</td><td>未列</td><td>未列</td></tr>
-          <tr><td>CONPASS 再验证队列<br><span class="small">中华内科杂志 2026，重庆，n=267（UPA 151 / BPA 116）</span></td><td>31.8%</td><td>98.3%</td><td>96.0%</td><td>52.5%</td></tr>
-          <tr><td>2025 Endocrine Society 指南中可考虑免 AVS 的年轻典型例外<br><span class="small">同一 2026 再验证队列比较</span></td><td>2.0%</td><td>100%</td><td>未列</td><td>未列</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="small">2025 Endocrine Society 指南仍建议拟手术 PA 患者在决定治疗路径前进行 CT + AVS；可考虑不做 AVS 的典型例外包括年龄 &lt;35 岁、显著 PA、低钾、肾素抑制和 CT 单侧肾上腺腺瘤。CONPASS 的阳性预测值依赖队列中 UPA 比例，换到不同人群时不能直接照搬。</p>
-  </section>
-
-  <section class="panel">
-    <h2><span class="num">6</span>自动审计</h2>
-    <p class="small">配套脚本 <code>audit-conpass.js</code> 会生成阈值边界、单位换算、CT 类型、异常值、适用性降级和 5000 条随机数据，逐条核对纯模型输出。每次改动后运行 <code>node audit-conpass.js</code>。</p>
-  </section>
-
-  <section class="panel">
-    <h2><span class="num">7</span>来源</h2>
-    <ol class="small">
-      <li>Song Y, Yang J, Shen H, et al. <i>Journal of Hypertension</i>, 2022;40(9):1692-1701. <a href="https://pubmed.ncbi.nlm.nih.gov/35881462/" target="_blank" rel="noopener noreferrer">PMID 35881462</a></li>
-      <li>杨淑敏, 魏馨, 宋颖, 等. <i>中华内科杂志</i>, 2026;65(7):717-724. <a href="https://pubmed.ncbi.nlm.nih.gov/42427044/" target="_blank" rel="noopener noreferrer">PMID 42427044</a></li>
-      <li>Endocrine Society. Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. 2025. <a href="https://www.endocrine.org/clinical-practice-guidelines/primary-aldosteronism-2" target="_blank" rel="noopener noreferrer">指南页面</a></li>
-    </ol>
-    <p class="note">本工具仅供科研与教学参考，不构成临床诊断或治疗决策依据。</p>
-  </section>
-
-  <footer>CONPASS model calculator. High specificity, limited sensitivity, transparent rule audit.</footer>
+  <footer>本工具仅基于公开发表的 CONPASS 规则计算，供科研与教学参考，不构成医疗诊断或治疗建议。</footer>
 </div>
 
 <script src="./conpass-model.js"></script>
@@ -404,7 +365,7 @@
   function renderVerdict(result) {
     var hasWarning = result.issues.some(function (issue) { return issue.severity === "warning"; });
     var boxClass = "negative";
-    var title = "不符合全部 CONPASS 标准";
+    var title = "暂不支持单侧 PA";
     var text = "不能据此排除单侧 PA；模型敏感度有限，建议按指南路径完成 AVS 分型。";
     if (result.status === "invalid") {
       boxClass = "invalid";
@@ -416,7 +377,7 @@
       text = "当前资料不是明确单侧病灶、或检测/诊断前提不匹配；不应据此给出免 AVS 或直接手术判断。";
     } else if (result.status === "conpass_positive") {
       boxClass = "positive";
-      title = hasWarning ? "符合 CONPASS 规则，但存在需核对项" : "符合 CONPASS 高特异度规则";
+      title = hasWarning ? "支持单侧 PA，但存在需核对项" : "支持单侧 PA（CONPASS 阳性）";
       text = hasWarning
         ? "四项阈值均满足，但存在检测范围或录入合理性提示；可作为辅助证据，需先核对报告后再讨论是否考虑免 AVS。"
         : "可作为专科团队评估是否考虑免 AVS 的辅助证据；是否手术仍需结合指南、影像、检测方法和患者情况。";
@@ -450,9 +411,9 @@
     state.lastResult = result;
     byId("placeholder").hidden = true;
     byId("resultBody").hidden = false;
+    renderVerdict(result);
     renderIssues(result);
     renderCriteria(result);
-    renderVerdict(result);
     markBadInputs(result);
   }
   function fillDemo(kind) {
